@@ -2,7 +2,7 @@ import collections
 from collections import Counter
 from typing import List
 
-from requests.utils import from_key_val_list
+#from requests.utils import from_key_val_list
 
 
 
@@ -393,15 +393,100 @@ class Solution:
             cur = max(nums[i], cur + nums[i])
             mur = max(mur, cur)
         return mur
-            
+# 以数组 intervals 表示若干个区间的集合，其中单个区间为 intervals[i] = [starti, endi]
+# 请你合并所有重叠的区间，并返回 一个不重叠的区间数组，该数组需恰好覆盖输入中的所有区间
+# 示例 1：
+# 输入：intervals = [[1,3],[2,6],[8,10],[15,18]]
+# 输出：[[1,6],[8,10],[15,18]]
+# 解释：区间 [1,3] 和 [2,6] 重叠, 将它们合并为 [1,6].
+# 示例 2：
+# 输入：intervals = [[1,4],[4,5]]
+# 输出：[[1,5]]
+# 解释：区间 [1,4] 和 [4,5] 可被视为重叠区间。
+# 示例 3：
+# 输入：intervals = [[4,7],[1,4]]
+# 输出：[[1,7]]
+# 解释：区间 [1,4] 和 [4,7] 可被视为重叠区间。
+    def merge(self, intervals: List[List[int]]) -> List[List[int]]:
+        return_arr = []
+        index_flag = []
+        swap_index = []
+        for i, interval in enumerate(intervals):
+            if i in index_flag:
+                continue
+            flag = False
 
+            for j in range(i + 1, len(intervals)):
+                if (intervals[j][0] <= intervals[i][1] and intervals[j][0] >= intervals[i][0]
+                        and intervals[j][1] >= intervals[i][1]):
+                    if i in swap_index:
+                        return_arr.pop()
+                    if [intervals[i][0], intervals[j][1]] not in return_arr:
+                        return_arr.append([intervals[i][0], intervals[j][1]])
+                    flag = True
+                    index_flag.append(j)
+                    swap_index.append(i)
+                    intervals[i] = [intervals[i][0],intervals[j][1]]
+                elif intervals[j][0] <= intervals[i][0] and intervals[j][1] >= intervals[i][0] and intervals[j][1] <= intervals[i][1]:
+                    if i in swap_index:
+                        return_arr.pop()
+                    if [intervals[j][0],intervals[i][1]] not in return_arr:
+                        return_arr.append([intervals[j][0], intervals[i][1]])
+                    flag = True
+                    index_flag.append(j)
+                    swap_index.append(i)
+                    intervals[i] = [intervals[j][0],intervals[i][1]]
+                elif intervals[j][0] <= intervals[i][0] and intervals[j][1] >= intervals[i][1]:
+                    if i in swap_index:
+                        return_arr.pop()
+                    if [intervals[j][0],intervals[j][1]] not in return_arr:
+                        return_arr.append([intervals[j][0], intervals[j][1]])
+                    flag = True
+                    index_flag.append(j)
+                    swap_index.append(i)
+                    intervals[i] = [intervals[j][0],intervals[j][1]]
+                elif intervals[j][0] >= intervals[i][0] and intervals[j][1] <= intervals[i][1]:
+                    if i in swap_index:
+                        return_arr.pop()
+                    if [intervals[i][0],intervals[i][1]] not in return_arr:
+                        return_arr.append([intervals[i][0], intervals[i][1]])
+                    flag = True
+                    index_flag.append(j)
+                    swap_index.append(i)
+                    intervals[i] = [intervals[i][0],intervals[i][1]]
+                else:
+                    continue
+            if not flag:
+                return_arr.append([intervals[i][0],intervals[i][1]])
+        return return_arr
 
+    def merge1(self, intervals: List[List[int]]) -> List[List[int]]:
+        intervals.sort(key=lambda x: x[0])
+        res = []
+        for i, interval in enumerate(intervals):
+            if len(res) == 0:
+                res.append(interval)
+                continue
+            if intervals[i][0] > res[-1][1]:
+                res.append(intervals[i])
+            else:
+                res[-1][1] = max([res[-1][1], intervals[i][1]])
+        return res
 
 s = Solution()
+
+#intervals = [[1,3],[2,6],[8,10],[15,18]]
+#intervals = [[1,4],[4,5]]
+#intervals = [[4,7],[1,4]]
+#intervals = [[1,4],[2,3]]
+#intervals = [[1,4],[0,2],[3,5]]
+intervals = [[2,3],[4,5],[6,7],[8,9],[1,10]]
+arr = s.merge1(intervals)
+print(arr)
 #len = s.maxSubArray([-2,1,-3,4,-1,2,1,-5,4])
 #len = s.maxSubArray([1])
-len = s.maxSubArray([5,4,-1,7,8])
-print(len)
+#len = s.maxSubArray([5,4,-1,7,8])
+#print(len)
 #num = s.subarraySum([1,1,1], 2)
 #num = s.subarraySum([1,2,3], 3)
 #num = s.subarraySum([1], 0)
