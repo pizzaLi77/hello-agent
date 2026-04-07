@@ -1,4 +1,5 @@
 import collections
+from collections import Counter
 from typing import List
 
 from requests.utils import from_key_val_list
@@ -244,38 +245,190 @@ class Solution:
 # 解释：唯一可能的三元组和为 0 。
     def threeSum(self, nums: list[int]) -> list[list[int]]:
         nums.sort()
-        return_list = []
-        list_dict_arr = []
-        for i, num in enumerate(nums):
-            return_child = []
-            if len(nums) < 3:
-                if len(nums) == 3 and nums[0] + nums[1] + nums[2] == 0:
-                    return_child.append(nums)
-                    return return_list.append(nums)
+        res = []
+        k = 0
+        for k in range(len(nums) - 2):
+            if nums[k] > 0:
+                break
+            if k > 0 and nums[k] == nums[k - 1]:
+                continue
+            i = k + 1
+            j = len(nums) - 1
+            while i < j:
+                s = nums[k] + nums[i] + nums[j]
+                if s < 0:
+                    i += 1
+                    while i < j and nums[i] == nums[i-1]:
+                        i += 1
+                elif s > 0:
+                    j -= 1
+                    while i < j and nums[j] == nums[j+1]:
+                        j -= 1
                 else:
-                    return return_list
-            left_pointer = i+1
-            right_pointer = i+2
-            while left_pointer < right_pointer:
-                dict_arr = {}
-                #and left_pointer < len(nums) and right_pointer < len(nums)
-                if num + nums[left_pointer] + nums[right_pointer] == 0:
-                    dict_arr[num] == None
+                    res.append([nums[k], nums[i], nums[j]])
+                    i += 1
+                    j -= 1
+                    while i < j and nums[i] == nums[i-1]:
+                        i += 1
+                    while i < j and nums[j] == nums[j+1]:
+                        j -= 1
+        return res
 
+# 给定一个字符串 s ，请你找出其中不含有重复字符的 最长 子串 的长度。
+# 示例 1:
+# 输入: s = "abcabcbb"
+# 输出: 3
+# 解释: 因为无重复字符的最长子串是 "abc"，所以其长度为 3。注意 "bca" 和 "cab" 也是正确答案。
+# 示例 2:
+# 输入: s = "bbbbb"
+# 输出: 1
+# 解释: 因为无重复字符的最长子串是 "b"，所以其长度为 1。
+# 示例 3:
+# 输入: s = "pwwkew"
+# 输出: 3
+# 解释: 因为无重复字符的最长子串是 "wke"，所以其长度为 3。
+#      请注意，你的答案必须是 子串 的长度，"pwke" 是一个子序列，不是子串。
+    def lengthOfLongestSubstring(self, s: str) -> int:
+        max_len = 0
+        dict_arr = {}
+        for i, e in enumerate(s):
+            k = i
+            arr_len = 0
+            while k <= len(s) - 1:
+                if s[k] not in dict_arr:
+                    dict_arr[s[k]] = 1
+                    arr_len += 1
+                    k += 1
+                    max_len = max(max_len, arr_len)
+                else:
+                    dict_arr.clear()
+                    break
+        return max_len
 
+    def lengthOfLongestSubstring1(self, s: str) -> int:
+        max_len = 0
+        set_arr = set()
+        curr_len = 0
+        left = 0
+        for i, e in enumerate(s):
+            curr_len += 1
+            while e in set_arr:
+                set_arr.remove(s[left])
+                left += 1
+                curr_len -= 1
+            max_len = max(max_len, curr_len)
+            set_arr.add(e)
+        return max_len
+# 给定两个字符串 s 和 p，找到 s 中所有 p 的 异位词 的子串，返回这些子串的起始索引。不考虑答案输出的顺序。
+# 示例 1:
+# 输入: s = "cbaebabacd", p = "abc"
+# 输出: [0,6]
+# 解释:
+# 起始索引等于 0 的子串是 "cba", 它是 "abc" 的异位词。
+# 起始索引等于 6 的子串是 "bac", 它是 "abc" 的异位词。
+# 示例 2:
+# 输入: s = "abab", p = "ab"
+# 输出: [0,1,2]
+# 解释:
+# 起始索引等于 0 的子串是 "ab", 它是 "ab" 的异位词。
+# 起始索引等于 1 的子串是 "ba", 它是 "ab" 的异位词。
+# 起始索引等于 2 的子串是 "ab", 它是 "ab" 的异位词。
+    def findAnagrams(self, s: str, p: str) -> List[int]:
+        cn_p = Counter(p)
+        cn_s = Counter()
+        ans = []
+        for i, e in enumerate(s):
+            cn_s[e] += 1
+            left = i + 1 - len(p)
+            if left < 0:
+                #未到窗口长度
+                continue
+            if cn_s == cn_p:
+                ans.append(left)
+            #右移左窗口
+            cn_s[s[left]] -= 1
+        return ans
+# 给你一个整数数组 nums 和一个整数 k ，请你统计并返回 该数组中和为 k 的子数组的个数 。
+# 子数组是数组中元素的连续非空序列。
+# 示例 1：
+# 输入：nums = [1,1,1], k = 2
+# 输出：2
+# 示例 2：
+# 输入：nums = [1,2,3], k = 3
+# 输出：2
+#     def subarraySum(self, nums: List[int], k: int) -> int:
+#         dict_arr = {}
+#         count = 0
+#         for i, num in enumerate(nums):
+#             dict_arr[num] = dict_arr.get(num, 0) + 1
+#             if
+    #前缀和+哈希表
+    def subarraySum(self, nums: List[int], k: int) -> int:
+        pre_sum = 0
+        count = 0
+        mp = {0: 1}
 
-                    right_pointer +=1
+        for num in nums:
+            pre_sum += num
+            count += mp.get(pre_sum - k, 0)
+            mp[pre_sum] = mp.get(pre_sum, 0) + 1
 
+        return count
+# 给你一个整数数组 nums ，请你找出一个具有最大和的连续子数组（子数组最少包含一个元素），返回其最大和。
+# 子数组是数组中的一个连续部分。
+# 示例 1：
+# 输入：nums = [-2,1,-3,4,-1,2,1,-5,4]
+# 输出：6
+# 解释：连续子数组 [4,-1,2,1] 的和最大，为 6
+# 示例 2：
+# 输入：nums = [1]
+# 输出：1
+# 示例 3：
+# 输入：nums = [5,4,-1,7,8]
+# 输出：23
+    def maxSubArray(self, nums: List[int]) -> int:
+        cur = nums[0]
+        mur = nums[0]
+        for i in range(1, len(nums)):
+            cur = max(nums[i], cur + nums[i])
+            mur = max(mur, cur)
+        return mur
+            
 
 
 
 s = Solution()
+#len = s.maxSubArray([-2,1,-3,4,-1,2,1,-5,4])
+#len = s.maxSubArray([1])
+len = s.maxSubArray([5,4,-1,7,8])
+print(len)
+#num = s.subarraySum([1,1,1], 2)
+#num = s.subarraySum([1,2,3], 3)
+#num = s.subarraySum([1], 0)
+#num = s.subarraySum([1, 3, 5, 4], 9)
+#print(num)
+# arr = s.findAnagrams("cbaebabacd", "abc")
+# print(arr)
+# 输入: s = "cbaebabacd", p = "abc"
+# 输出: [0,6]
 
+# s = "cbaebabacd"
+# p = "abc"
+# dict_arr = Counter(p)
+# print(dict_arr)
+# arr = Counter()
+# print(arr)
+#len = s.lengthOfLongestSubstring("abcabcbb")
+#len = s.lengthOfLongestSubstring("pwwkew")
+#len = s.lengthOfLongestSubstring1(" ")
+#len = s.lengthOfLongestSubstring("c")
+#print(len)
 #arr = [1,8,6,2,5,4,8,3,7]
-arr = [4,3,2,1,4]
-#arr = [1,1]
-print(s.maxArea(arr))
-
+# arr = [4,3,2,1,4]
+# #arr = [1,1]
+# print(s.maxArea(arr))
+# arr = s.threeSum([-1,0,1,2,-1,-4])
+# print(arr)
 # arr = [1,3,2,6]
 # for loop in range(1, len(arr)):
 #     print(loop)
