@@ -472,17 +472,182 @@ class Solution:
             else:
                 res[-1][1] = max([res[-1][1], intervals[i][1]])
         return res
+# 给定一个整数数组 nums，将数组中的元素向右轮转 k 个位置，其中 k 是非负数。
+# 示例 1:
+# 输入: nums = [1,2,3,4,5,6,7], k = 3
+# 输出: [5,6,7,1,2,3,4]
+# 解释:
+# 向右轮转 1 步: [7,1,2,3,4,5,6]
+# 向右轮转 2 步: [6,7,1,2,3,4,5]
+# 向右轮转 3 步: [5,6,7,1,2,3,4]
+# 示例 2:
+# 输入：nums = [-1,-100,3,99], k = 2
+# 输出：[3,99,-1,-100]
+# 解释:
+# 向右轮转 1 步: [99,-1,-100,3]
+# 向右轮转 2 步: [3,99,-1,-100]
+    def rotate(self, nums: List[int], k: int) -> None:
+        """
+        Do not return anything, modify nums in-place instead.
+        """
+        new_nums = [0] * len(nums)
+        for i, num in enumerate(nums):
+            new_nums[(i+k) % len(nums)] = num
+        nums[:] = new_nums
+        print(nums)
+    def rotate1(self, nums: List[int], k: int) -> None:
+        """
+        Do not return anything, modify nums in-place instead.
+        """
+        lenth = len(nums)
+        k = k % lenth
+        def reverse(left: int, right: int, nums: List[int]) -> None:
+            while left < right:
+                temp = nums[left]
+                nums[left] = nums[right]
+                nums[right] = temp
+                left += 1
+                right -= 1
+        nums.reverse()
+        reverse(0, k-1, nums)
+        reverse(k, len(nums)-1, nums)
+
+# 给你一个整数数组 nums，返回 数组 answer ，其中 answer[i] 等于 nums 中除了 nums[i] 之外其余各元素的乘积 。
+# 题目数据 保证 数组 nums之中任意元素的全部前缀元素和后缀的乘积都在  32 位 整数范围内。
+# 请 不要使用除法，且在 O(n) 时间复杂度内完成此题。
+# 示例 1:
+# 输入: nums = [1,2,3,4]
+# 输出: [24,12,8,6]
+# 示例 2:
+# 输入: nums = [-1,1,0,-3,3]
+# 输出: [0,0,9,0,0]
+
+    def productExceptSelf(self, nums: List[int]) -> List[int]:
+        lenth = len(nums)
+        arr = [1] * len(nums)
+        left_arr = [1] * len(nums)
+        right_arr = [1] * len(nums)
+        for i in range(1, len(nums)):
+            left_arr[i] = left_arr[i - 1] * nums[i - 1]
+        for i in range(lenth-2, -1, -1):
+            right_arr[i] = right_arr[i+1] * nums[i+1]
+        for i in range(lenth):
+            arr[i] = left_arr[i] * right_arr[i]
+        return arr
+# 给定一个数组 prices ，它的第 i 个元素 prices[i] 表示一支给定股票第 i 天的价格。
+# 你只能选择 某一天 买入这只股票，并选择在 未来的某一个不同的日子 卖出该股票。设计一个算法来计算你所能获取的最大利润。
+# 返回你可以从这笔交易中获取的最大利润。如果你不能获取任何利润，返回 0 。
+# 示例 1：
+# 输入：[7,1,5,3,6,4]
+# 输出：5
+# 解释：在第 2 天（股票价格 = 1）的时候买入，在第 5 天（股票价格 = 6）的时候卖出，最大利润 = 6-1 = 5 。
+#      注意利润不能是 7-1 = 6, 因为卖出价格需要大于买入价格；同时，你不能在买入前卖出股票。
+# 示例 2：
+# 输入：prices = [7,6,4,3,1]
+# 输出：0
+# 解释：在这种情况下, 没有交易完成, 所以最大利润为 0。
+    def maxProfit(self, prices: List[int]) -> int:
+        max_profit = 0
+        min_price = prices[0]
+        for i in range (1, len(prices)):
+            max_profit = max(max_profit, prices[i] - min_price)
+            min_price = min(min_price, prices[i])
+        return max_profit
+        #
+        # max_profit = 0
+        # for i, price in enumerate(prices):
+        #     j = i + 1
+        #     while j < len(prices):
+        #         max_profit = max(max_profit, prices[j] - price)
+        #         j += 1
+        # return max_profit
+# 给你一个非负整数数组 nums ，你最初位于数组的 第一个下标 。数组中的每个元素代表你在该位置可以跳跃的最大长度。
+# 判断你是否能够到达最后一个下标，如果可以，返回 true ；否则，返回 false
+# 示例 1：
+# 输入：nums = [2,3,1,1,4]
+# 输出：true
+# 解释：可以先跳 1 步，从下标 0 到达下标 1, 然后再从下标 1 跳 3 步到达最后一个下标
+# 示例 2：
+# 输入：nums = [3,2,1,0,4]
+# 输出：false
+# 解释：无论怎样，总会到达下标为 3 的位置。但该下标的最大跳跃长度是 0 ， 所以永远不可能到达最后一个下标
+    def canJump(self, nums: List[int]) -> bool:
+        sum_value = 0
+        for i in range(len(nums)):
+            if i > sum_value:
+                return False
+            sum_value = max(sum_value, i + nums[i])
+        return True
+# 给定一个长度为 n 的 0 索引整数数组 nums。初始位置在下标 0。
+# 每个元素 nums[i] 表示从索引 i 向后跳转的最大长度。换句话说，如果你在索引 i 处，你可以跳转到任意 (i + j) 处：
+# 0 <= j <= nums[i] 且
+# i + j < n
+# 返回到达 n - 1 的最小跳跃次数。测试用例保证可以到达 n - 1。
+# 示例 1:
+# 输入: nums = [2,3,1,1,4]
+# 输出: 2
+# 解释: 跳到最后一个位置的最小跳跃数是 2。
+#      从下标为 0 跳到下标为 1 的位置，跳 1 步，然后跳 3 步到达数组的最后一个位置。
+# 示例 2:
+# 输入: nums = [2,3,0,1,4]
+# 输出: 2
+
+    def jump(self, nums: List[int]) -> int:
+        step = 0
+        sum_value = 0
+        default_index = 0
+        if len(nums) <= 1:
+            return sum_value
+        for i in range(len(nums) - 1):
+            sum_value = max(sum_value, i + nums[i])
+            if i == default_index:
+                step += 1
+                default_index = sum_value
+        return step
+# 给你一个字符串 s 。我们要把这个字符串划分为尽可能多的片段，同一字母最多出现在一个片段中。例如，字符串 "ababcc" 能够被分为 ["abab", "cc"]，
+# 但类似 ["aba", "bcc"] 或 ["ab", "ab", "cc"] 的划分是非法的。
+# 注意，划分结果需要满足：将所有划分结果按顺序连接，得到的字符串仍然是 s 。
+# 返回一个表示每个字符串片段的长度的列表。
+# 示例 1：
+# 输入：s = "ababcbacadefegdehijhklij"
+# 输出：[9,7,8]
+# 解释：
+# 划分结果为 "ababcbaca"、"defegde"、"hijhklij" 。
+# 每个字母最多出现在一个片段中。
+# 像 "ababcbacadefegde", "hijhklij" 这样的划分是错误的，因为划分的片段数较少。
+# 示例 2：
+# 输入：s = "eccbbbbdec"
+# 输出：[10]
+    def partitionLabels(self, s: str) -> List[int]:
+
+
 
 s = Solution()
+#num = s.jump([2,3,1,1,4])
+#num = s.jump([2,3,0,1,4])
+#num = s.jump([1,2,1,1,1])
+num = s.jump([1,2])
+print(num)
+#flag = s.canJump([2,3,1,1,4])
+#flag = s.canJump([3,2,1,0,4])
+#flag = s.canJump([0])
+#print(flag)
+#max_value = s.maxProfit([7,1,5,3,6,4])
+#max_value = s.maxProfit([7,6,4,3,1])
+#print(max_value)
+# arr = s.productExceptSelf([1,2,3,4])
+# print(arr)
+#s.rotate1([1,2,3,4,5,6,7], 3)
+#s.rotate1([-1], 2)
 
 #intervals = [[1,3],[2,6],[8,10],[15,18]]
 #intervals = [[1,4],[4,5]]
 #intervals = [[4,7],[1,4]]
 #intervals = [[1,4],[2,3]]
 #intervals = [[1,4],[0,2],[3,5]]
-intervals = [[2,3],[4,5],[6,7],[8,9],[1,10]]
-arr = s.merge1(intervals)
-print(arr)
+# intervals = [[2,3],[4,5],[6,7],[8,9],[1,10]]
+# arr = s.merge1(intervals)
+# print(arr)
 #len = s.maxSubArray([-2,1,-3,4,-1,2,1,-5,4])
 #len = s.maxSubArray([1])
 #len = s.maxSubArray([5,4,-1,7,8])
