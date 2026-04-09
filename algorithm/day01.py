@@ -619,15 +619,199 @@ class Solution:
 # 输入：s = "eccbbbbdec"
 # 输出：[10]
     def partitionLabels(self, s: str) -> List[int]:
+        dict_arr = {s[0]:1}
+        return_arr = []
+        start = 0
+        for i in range(1, len(s)):
+            flag = False
+            if s[i] in dict_arr:
+                dict_arr[s[i]] += 1
+                continue
+            for j in range(i+1, len(s)):
+                if s[j] in dict_arr:
+                    flag = True
+                    break
+            if not flag:
+                return_arr.append(i - start)
+                start = i
+                dict_arr.clear()
+            dict_arr[s[i]] = 1
+        return_arr.append(len(s) - start)
+        return return_arr
+
+    def partitionLabels1(self, s: str) -> List[int]:
+        dict_arr = {}
+        return_arr = []
+        start = 0
+        end = 0
+        for i in range(len(s)):
+            dict_arr[s[i]] = i
+        for i in range(len(s)):
+            end = max(end, dict_arr[s[i]])
+            if end == i:
+                return_arr.append(end - start + 1)
+                start = i + 1
+        return return_arr
+
+# 假设你正在爬楼梯。需要 n 阶你才能到达楼顶。
+# 每次你可以爬 1 或 2 个台阶。你有多少种不同的方法可以爬到楼顶呢？
+# 示例 1：
+# 输入：n = 2
+# 输出：2
+# 解释：有两种方法可以爬到楼顶。
+# 1. 1 阶 + 1 阶
+# 2. 2 阶
+# 示例 2：
+# 输入：n = 3
+# 输出：3
+# 解释：有三种方法可以爬到楼顶。
+# 1. 1 阶 + 1 阶 + 1 阶
+# 2. 1 阶 + 2 阶
+# 3. 2 阶 + 1 阶
+    def climbStairs(self, n: int) -> int:
+        if n == 1:
+            return 1
+        if n == 2:
+            return 2
+        dp = [0] * (n + 1)
+        dp[1] = 1
+        dp[2] = 2
+        for i in range(3, n+1):
+            dp[i] = dp[i - 1] + dp[i - 2]
+        return dp[n]
+
+    def climbStairs1(self, n: int) -> int:
+        if n == 1:
+            return 1
+        if n == 2:
+            return 2
+        a = 1
+        b = 2
+        for i in range(3, n+1):
+            temp = a
+            a = b
+            b = temp + b
+        return b
+# 给定一个非负整数 numRows，生成「杨辉三角」的前 numRows 行
+# 在「杨辉三角」中，每个数是它左上方和右上方的数的和
+# 示例 1:
+# 输入: numRows = 5
+# 输出: [[1],[1,1],[1,2,1],[1,3,3,1],[1,4,6,4,1]]
+# 示例 2:
+# 输入: numRows = 1
+# 输出: [[1]]
+    def generate(self, numRows: int) -> List[List[int]]:
+        # dp[i][j] = dp[i - 1][j - 1] + dp[i - 1][j]
+        if numRows == 1:
+            return [[1]]
+        if numRows == 2:
+            return [[1], [1, 1]]
+        dp = [] * numRows
+        for i in range(numRows):
+            dp_child = [0] * (i + 1)
+            dp.append(dp_child)
+        dp[0][0] = 1
+        dp[1][0] = 1
+        dp[1][1] = 1
+        for i in range(2, numRows):
+            for j in range(0, i + 1):
+                if j == 0:
+                    dp[i][j] = 1
+                elif j == i:
+                    dp[i][j] = 1
+                else:
+                    dp[i][j] = dp[i - 1][j - 1] + dp[i - 1][j]
+        return dp
+
+    def generate1(self, numRows: int) -> List[List[int]]:
+        dp = []
+        for i in range(numRows):
+            row = [1] * (i + 1)
+            for j in range(1, i):
+                row[j] = dp[i - 1][j - 1] + dp[i - 1][j]
+            dp.append(row)
+        return dp
+# 你是一个专业的小偷，计划偷窃沿街的房屋。每间房内都藏有一定的现金，影响你偷窃的唯一制约因素就是相邻的房屋装有相互连通的防盗系统，
+# 如果两间相邻的房屋在同一晚上被小偷闯入，系统会自动报警。
+# 给定一个代表每个房屋存放金额的非负整数数组，计算你 不触动警报装置的情况下 ，一夜之内能够偷窃到的最高金额。
+# 示例 1：
+# 输入：[1,2,3,1]
+# 输出：4
+# 解释：偷窃 1 号房屋 (金额 = 1) ，然后偷窃 3 号房屋 (金额 = 3)。
+#      偷窃到的最高金额 = 1 + 3 = 4 。
+# 示例 2：
+# 输入：[2,7,9,3,1]
+# 输出：12
+# 解释：偷窃 1 号房屋 (金额 = 2), 偷窃 3 号房屋 (金额 = 9)，接着偷窃 5 号房屋 (金额 = 1)。
+# 偷窃到的最高金额 = 2 + 9 + 1 = 12 。
+
+    def rob(self, nums: List[int]) -> int:
+        '''
+        偷第i家
+        不偷第i家
+
+        若偷第i家则   最大就是 dp = dp[i-2] + nums[i]
+        若不偷第i家则 最大就是 dp = dp[i-1]
+        dp[i] = max(dp[i-1], dp[i-2] + nums[i])
+
+        [1,2,3,1]
+        dp[0] = 1
+        dp[1] = 2
+        dp[2] = 4
+        dp[3] = 4
+        :pa`ram nums:
+        :return:
+        '''
+        if len(nums) == 1:
+            return nums[0]
+        if len(nums) == 2:
+            return max(nums[0], nums[1])
+        dp = [0] * len(nums)
+        dp[0] = nums[0]
+        dp[1] = max(nums[0], nums[1])
+        for i in range(2, len(nums)):
+            dp[i] = max(dp[i - 1], dp[i - 2] + nums[i])
+        return dp[-1]
+# 给你一个整数 n ，返回和为 n 的完全平方数的最少数量
+# 完全平方数 是一个整数，其值等于另一个整数的平方；换句话说，其值等于一个整数自乘的积。例如，1、4、9 和 16 都是完全平方数，而 3 和 11 不是
+# 示例 1：
+# 输入：n = 12
+# 输出：3
+# 解释：12 = 4 + 4 + 4
+# 示例 2：
+# 输入：n = 13
+# 输出：2
+# 解释：13 = 4 + 9
+    def numSquares(self, n: int) -> int:
+        '''
+        k1 = n
+        k2 = 12/n
+
+
+
+        dp[i] =
+        :param n:
+        :return:
+        '''
 
 
 
 s = Solution()
+#num = s.rob([1,2,3,1])
+num = s.rob([2,7,9,3,1])
+print(num)
+# arr = s.generate1(5)
+# print(arr)
+# time = s.climbStairs1(4)
+# print(time)
+#arr = s.partitionLabels1("ababcbacadefegdehijhklij")
+#arr = s.partitionLabels1("eccbbbbdec")
+#print(arr)
 #num = s.jump([2,3,1,1,4])
 #num = s.jump([2,3,0,1,4])
 #num = s.jump([1,2,1,1,1])
-num = s.jump([1,2])
-print(num)
+# num = s.jump([1,2])
+# print(num)
 #flag = s.canJump([2,3,1,1,4])
 #flag = s.canJump([3,2,1,0,4])
 #flag = s.canJump([0])
